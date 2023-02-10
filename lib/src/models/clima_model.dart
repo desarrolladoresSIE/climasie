@@ -38,6 +38,10 @@ class Weather {
         description: json['description'],
         icon: json['icon'],
       );
+
+  String getUrlImageClima() {
+    return 'http://openweathermap.org/img/wn/$icon@2x.png';
+  }
 }
 
 class Main {

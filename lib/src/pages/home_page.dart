@@ -1,4 +1,5 @@
 import 'package:clima/src/blocs/bloc/clima_bloc.dart';
+import 'package:clima/src/models/clima_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -8,33 +9,46 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          const _FondoApp(),
-          Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  const SafeArea(child: _TextNameZoneAndDateWidget()),
-                  IntrinsicHeight(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: const [
-                        _DateTemp(),
-                        VerticalDivider(
-                          color: Colors.white,
-                          thickness: 1,
-                        ),
-                        _TempMaxMin()
-                      ],
-                    ),
-                  ),
-                ],
-              ))
-        ],
+      body: BlocBuilder<ClimaBloc, ClimaState>(
+        builder: (context, state) {
+          return (state.clima != null)
+              ? Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    const _FondoApp(),
+                    Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          SafeArea(
+                            child: _TextNameZoneAndDateWidget(
+                              zoneName: state.clima!.name,
+                            ),
+                          ),
+                          IntrinsicHeight(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                _DateTemp(climaModel: state.clima!),
+                                const VerticalDivider(
+                                  color: Colors.white,
+                                  thickness: 1,
+                                ),
+                                const _TempMaxMin()
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                )
+              : const Center(
+                  child: CircularProgressIndicator(),
+                );
+        },
       ),
     );
   }
@@ -65,7 +79,8 @@ class _TempMaxMin extends StatelessWidget {
 }
 
 class _DateTemp extends StatelessWidget {
-  const _DateTemp();
+  final ClimaModel climaModel;
+  const _DateTemp({required this.climaModel});
 
   @override
   Widget build(BuildContext context) {
@@ -84,12 +99,12 @@ class _DateTemp extends StatelessWidget {
         Row(
           children: [
             Image.network(
-              'http://openweathermap.org/img/wn/01d@2x.png',
+              climaModel.weather.getUrlImageClima(),
               height: 40,
             ),
-            const Text(
-              'Soleado',
-              style: TextStyle(
+            Text(
+              climaModel.weather.description,
+              style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                   fontSize: 15),
@@ -166,34 +181,31 @@ class _TemMaxMinWidget extends StatelessWidget {
 }
 
 class _TextNameZoneAndDateWidget extends StatelessWidget {
-  const _TextNameZoneAndDateWidget();
+  final String zoneName;
+  const _TextNameZoneAndDateWidget({required this.zoneName});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ClimaBloc, ClimaState>(
-      builder: (context, state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Estacion cihahuila',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 35,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 3),
-            const Text(
-              '22 de marzo del 2022',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-              ),
-            ),
-          ],
-        );
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          zoneName,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 35,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 3),
+        const Text(
+          '22 de marzo del 2022',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 13,
+          ),
+        ),
+      ],
     );
   }
 }
